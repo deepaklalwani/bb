@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="jar_resources"/>
+	<classpathentry kind="var" path="AXIS2_HOME/lib/axis2-jaxws-1.3.jar" sourcepath="/AXIS2_HOME/src/axis2-1.3-src.zip"/>
+	<classpathentry kind="var" path="AXIS2_HOME/lib/axis2-jaxws-api-1.3.jar"/>
+	<classpathentry kind="var" path="AXIS2_HOME/lib/axis2-jws-api-1.3.jar"/>
+	<classpathentry kind="var" path="BB_HOME/systemlib/bb-platform.jar"/>
+	<classpathentry kind="output" path="_eclipse_"/>
+</classpath>

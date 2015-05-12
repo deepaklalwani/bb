@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<manifest>
+  <webservice>
+    <name value="HelloWorld.WS" />
+    <description value="Hello world webservice" />
+
+    <permissions>
+      <permission type="attribute" name="sample.*" actions="get,set" />
+      <permission type="java.io.FilePermission" name="&lt;&lt;ALL FILES&gt;&gt;" actions="read,write,delete" />
+    </permissions>
+  </webservice>
+</manifest>

@@ -1,0 +1,138 @@
+<!--
+  ==
+  == Parameters in project.properties:
+  ==
+  ==   bb.home        Blackboard installation location
+  ==   axis2.home     Axis2 installation location location
+  ==
+ -->
+
+<project name="SampleWs" default="all" basedir=".">
+  <description>Blackboard sample webservice build file</description>
+
+  <property file="project.properties"/>
+
+  <!-- set path and file properties -->
+  <property name="src"            location="src"/>
+  <property name="build"          location="build"/>
+  <property name="dist"           location="dist"/>
+  <property name="doc"            location="docdist"/>
+  <property name="apidoc"         location="apidoc"/>
+  <property name="distfileloc"    location="${dist}/lib"/>
+  <property name="target.doc.zip" value="${doc}/documentation.zip"/>
+  <property name="servicefile"    value="sampleWebservice.aar"/>
+  <property name="pojofile"       value="sampleWebservice.jar"/>
+
+  <!-- set classpath for javadocs -->
+  <path id="cp">
+    <pathelement path="${bb.home}/systemlib/bb-exec.jar"/>
+    <pathelement path="${bb.home}/systemlib/bb-platform.jar"/>
+    <pathelement path="${bb.home}/system/build/clover-ant/lib/clover.jar"/>
+    <pathelement path="${axis2.home}/lib/axis2-jws-api-1.3.jar"/>
+    <pathelement path="${axis2.home}/lib/axis2-jaxws-api-1.3.jar"/>
+    <pathelement path="${axis2.home}/lib/axis2-jaxws-1.3.jar"/>
+    <pathelement path="${build}"/>
+  </path>
+
+  <!-- default target that will build everything  -->
+  <target name="all" depends="compile, pojo, services"/>
+
+  <!-- validate global properties have been set and create required directories -->
+  <target name="init">
+    <fail unless="bb.home">Missing required parameter "bb.home"!</fail>
+    <fail unless="axis2.home">Missing required parameter "axis2.home"!</fail>
+    <!-- Create the build directory structure used by compile -->
+    <mkdir dir="${build}"/>
+    <!-- Create the distribution directory -->
+    <mkdir dir="${dist}/lib"/>
+    <!-- Create the doc directory -->
+    <mkdir dir="${doc}"/>
+
+    <condition property="is.services.project">
+      <available file="jar_resources/META-INF/services.xml"/>
+    </condition>
+  </target>
+
+  <!-- Compile -->
+  <target name="compile" depends="init" description="compile the source">
+    <!-- Compile the java code from ${src} into ${build} -->
+    <javac srcdir="${src}" destdir="${build}">
+      <classpath>
+        <fileset dir="${bb.home}/systemlib" includes="bb-platform.jar"/>
+        <fileset dir="${axis2.home}/lib"    includes="axis2-j*.jar"/>
+      </classpath>
+    </javac>
+  </target>
+
+  <target name="pojo" depends="docs.public.shallow, -zip-javadoc" description="generate the distribution" unless="is.services.project">
+    <!-- Put everything in ${build} into the samplewebservice.jar file -->
+    <jar jarfile="${distfileloc}/${pojofile}" basedir="${build}">
+      <fileset dir="jar_resources" includes="**"/>
+      <fileset dir="${doc}"        includes="**"/>
+    </jar>
+  </target>
+
+  <target name="services" depends="docs.public.shallow, -zip-javadoc" description="generate the distribution" if="is.services.project">
+    <!-- Put everything in ${build} into the samplewebservice.aar file -->
+    <jar jarfile="${distfileloc}/${servicefile}" basedir="${build}">
+      <fileset dir="jar_resources" includes="**"/>
+      <fileset dir="${doc}"        includes="**"/>
+    </jar>
+  </target>
+
+
+  <target name="clean" description="clean up">
+    <!-- Delete the ${build} and ${dist} directory trees -->
+    <delete dir="${build}"/>
+    <delete dir="${dist}"/>
+    <delete dir="${apidoc}"/>
+    <delete dir="${doc}"/>
+  </target>
+
+  <target name="-zip-javadoc">
+    <antcall target="-create-jar">
+      <param name="param.basedir" value="${apidoc}"/>
+      <param name="param.jarfile" value="${target.doc.zip}"/>
+    </antcall>
+  </target>
+
+  <target name="-create-jar">
+    <!-- Default to including everything -->
+    <property name="param.includes" value="**"/>
+
+    <mkdir dir="jar_resources"/>
+    <jar jarfile="${param.jarfile}" compress="${jar.compress}" index="${jar.index}">
+      <manifest>
+        <attribute name="Version" value="1.0"/>
+      </manifest>
+      <fileset dir="${param.basedir}" includes="${param.includes}"/>
+      <fileset dir="jar_resources"    includes="${param.includes}"/>
+    </jar>
+  </target>
+
+  <!-- Create javadocs -->
+  <target name="docs.public.shallow" depends="init, -docs.public.shallow"/>
+  <target name="-docs.public.shallow">
+    <delete dir="${apidoc}"/>
+    <mkdir dir="${apidoc}"/>
+    <delete dir="_distrib_/_temp_source"/>
+    <echo>Making temp copy of source...</echo>
+    <copy todir="_distrib_/_temp_source">
+      <!-- Copy both .java and .html -->
+      <fileset dir="src" includes="**/*.java"/>
+      <fileset dir="src" includes="**/*.html"/>
+    </copy>
+
+    <!-- Create zip file containing documentation  -->
+    <javadoc sourcepath="_distrib_/_temp_source"
+             failonerror="true"
+             author="false"
+             version="true"
+             use="true"
+             destdir="${apidoc}"
+             additionalparam="-breakiterator"
+             packagenames="sample.*"
+             classpathref="cp"/>
+  </target>
+
+</project>
